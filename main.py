@@ -1,17 +1,21 @@
-from fastapi import FastAPI
+from typing import Optional, Type
+
+from fastapi import FastAPI, Request
+# response classes
+from fastapi.responses import HTMLResponse
+# templates
+from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
-from tortoise.contrib.fastapi import register_tortoise
-from models import *
-from authentication import *
-# signals are used to perform some actions when a certain event occurs
-# signals
-from tortoise.signals import post_save
-from typing import List, Optional, Type
 from tortoise import BaseDBAsyncClient
+from tortoise.contrib.fastapi import register_tortoise
+# signals (used to perform some actions when a certain event occurs)
+from tortoise.signals import post_save
 
-# Run this command to start the server:
-# uvicorn main:app --reload
+from authentication import *
+from emails import *
+from models import *
 
+# Run this command to start the server: uvicorn main:app --reload
 
 app = FastAPI()
 
@@ -28,12 +32,12 @@ async def create_business(
     if created:
         business_obj = await Business.create(name=instance.username, owner=instance)
         await business_pydantic.from_tortoise_orm(business_obj)
-        # TODO: send the email to the user
+        await send_email([instance.email], instance)
 
 
 @app.get("/")
 def index():
-    return RedirectResponse(url="/docs")
+    return {"message": "Hello World"}
 
 
 @app.post("/registration")
@@ -48,6 +52,23 @@ async def user_registration(user: user_pydantic_in):
                    f"verify your account"
     }
 
+
+templates = Jinja2Templates(directory="templates")
+
+
+@app.get("/verification", response_class=HTMLResponse)
+async def email_verification(request: Request, token: str):
+    user = await verify_token(token)
+    if user and not user.is_verified:
+        user.is_verified = True
+        await user.save()
+        return templates.TemplateResponse("verification.html",
+                                          {"request": request, "username": user.username,})
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
 
 register_tortoise(
     app,
