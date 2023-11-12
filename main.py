@@ -1,4 +1,5 @@
 # Run this command to start the server: uvicorn main:app --reload
+# Run this commando to freeze the requirements: pip freeze > requirements.txt
 from typing import Optional, Type
 from fastapi import FastAPI, Request, status, HTTPException, Depends
 
@@ -17,13 +18,27 @@ from tortoise.signals import post_save
 # Authentication
 from authentication import *
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+import secrets
+from fastapi.staticfiles import StaticFiles
+from PIL import Image
+
+# .env
+from dotenv import dotenv_values
+
+# Image upload
+from fastapi import UploadFile, File
 
 from emails import *
 from models import *
 
 app = FastAPI()
 
+credentials = dotenv_values(".env")
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# static file setup config
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.post("/token")
@@ -108,6 +123,84 @@ async def email_verification(request: Request, token: str):
         detail="Invalid or expired token",
         headers={"WWW-Authenticate": "Bearer"}
     )
+
+
+@app.post("/uploadfile/profile")
+async def create_upload_file(file: UploadFile = File(...), user: user_pydantic = Depends(get_current_user)):
+    filepath = "./static/images/"
+    filename = file.filename
+    extension = filename.split(".")[1]
+
+    if extension not in ["png", "jpg", "jpeg"]:
+        return {"status": "failed", "message": "Invalid file format"}
+
+    token_name = secrets.token_hex(10) + "." + extension
+    generated_name = filepath + token_name
+    file_content = await file.read()
+
+    with open(generated_name, "wb") as file:
+        file.write(file_content)
+
+    # resize image *PILLOW*
+    image = Image.open(generated_name)
+    image = image.resize((200, 200))
+    image.save(generated_name)
+    file.close()
+
+    business = await Business.get(owner=user)
+    owner = await business.owner
+    if owner == user:
+        business.logo = token_name
+        await business.save()
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorized to perform this action",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    file_url = credentials["SERVER_URL"] + generated_name[1:]
+    return {"status": "ok", "message": "Image uploaded successfully", "url": file_url}
+
+
+@app.post("/uploadfile/product/{product_id}")
+async def create_upload_file(file: UploadFile = File(...), product_id: int = None,
+                             user: user_pydantic = Depends(get_current_user)):
+    filepath = "./static/images/"
+    filename = file.filename
+    extension = filename.split(".")[1]
+
+    if extension not in ["png", "jpg", "jpeg"]:
+        return {"status": "failed", "message": "Invalid file format"}
+
+    token_name = secrets.token_hex(10) + "." + extension
+    generated_name = filepath + token_name
+    file_content = await file.read()
+
+    with open(generated_name, "wb") as file:
+        file.write(file_content)
+
+    # resize image *PILLOW*
+    image = Image.open(generated_name)
+    image = image.resize((200, 200))
+    image.save(generated_name)
+    file.close()
+
+    product = await Product.get(id=product_id)
+    business = await product.business
+    owner = await business.owner
+    if owner == user:
+        product.image = token_name
+        await product.save()
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorized to perform this action",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+    file_url = credentials["SERVER_URL"] + generated_name[1:]
+    return {"status": "ok", "message": "Image uploaded successfully", "url": file_url}
 
 
 register_tortoise(
