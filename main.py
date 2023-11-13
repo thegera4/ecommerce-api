@@ -1,7 +1,8 @@
 # Run this command to start the server: uvicorn main:app --reload
 # Run this commando to freeze the requirements: pip freeze > requirements.txt
+
 from typing import Optional, Type
-from fastapi import FastAPI, Request, status, HTTPException, Depends
+from fastapi import FastAPI, Request
 
 # response classes
 from fastapi.responses import HTMLResponse
@@ -22,12 +23,7 @@ import secrets
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
 
-# .env
-from dotenv import dotenv_values
-
-# Image upload
-from fastapi import UploadFile, File
-
+# Auxiliary functions
 from emails import *
 from models import *
 
@@ -60,7 +56,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, credentials["SECRET"], algorithms=["HS256"])
         user = await User.get(id=payload.get("id"))
-    except:
+    except NotImplementedError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",
