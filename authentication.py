@@ -17,7 +17,7 @@ async def verify_token(token: str):
     try:
         payload = jwt.decode(token, credentials["SECRET"], algorithms=["HS256"])
         user = await User.get(id=payload["id"])
-    except:
+    except ValueError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",

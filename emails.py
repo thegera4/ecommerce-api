@@ -1,11 +1,8 @@
-from fastapi import (BackgroundTasks, UploadFile, File, Form, Depends, HTTPException, status)
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from dotenv import dotenv_values
-from pydantic import BaseModel, EmailStr
 from typing import List
 from models import User
 import jwt
-
 
 credentials = dotenv_values(".env")
 
@@ -40,7 +37,7 @@ async def send_email(email: List, instance: User):
                         Please click the link below to verify your account</p> 
                       <a style="margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; font-size: 1rem; 
                       text-decoration: none; background: #0275d8; color: white;"
-                      href="http://localhost:8000/verification/?token={token}">
+                      href="{credentials["SERVER_URL"]}/verification/?token={token}">
                         Verify your account
                       </a> 
                       <p>Please ignore this email if you did not register in our Shop. Thanks</p>
