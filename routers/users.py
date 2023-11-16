@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-from models import User, user_pydantic, user_pydantic_in, Business
+from models import *
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 from dotenv import dotenv_values
@@ -32,7 +32,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 # Endpoints:
 
 # Get all users endpoint
-@router.get("/", response_model=dict, status_code=status.HTTP_200_OK)
+@router.get("/", response_model=AllUsersResponse, status_code=status.HTTP_200_OK)
 async def get_all_users():
     try:
         users = await user_pydantic.from_queryset(User.all())
@@ -44,7 +44,7 @@ async def get_all_users():
 
 
 # Get single user endpoint
-@router.post("/me", response_model=dict, status_code=status.HTTP_200_OK)
+@router.post("/me", response_model=SingleUserResponse, status_code=status.HTTP_200_OK)
 async def user_login(user: user_pydantic_in = Depends(get_current_user)):
     try:
         business = await Business.get(owner=user)

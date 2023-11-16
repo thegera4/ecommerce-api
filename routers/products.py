@@ -7,6 +7,9 @@ router = APIRouter(prefix="/products", tags=["Products"],
                    responses={status.HTTP_404_NOT_FOUND: {"description": "Product(s) not found"}})
 
 
+# Endpoints:
+
+# Get all products endpoint
 @router.get("/", response_model=AllProductsResponse, status_code=status.HTTP_200_OK)
 async def get_all_products():
     try:
@@ -16,6 +19,7 @@ async def get_all_products():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No products found")
 
 
+# Get a single product endpoint
 @router.get("/{product_id}", response_model=SingleProductResponse, status_code=status.HTTP_200_OK)
 async def get_product(product_id: int):
     try:
@@ -44,6 +48,7 @@ async def get_product(product_id: int):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
 
 
+# Add a single new product endpoint
 @router.post("/", response_model=AddProductResponse, status_code=status.HTTP_200_OK)
 async def add_new_product(product: product_pydantic_in, user: user_pydantic = Depends(get_current_user)):
     product_info = product.dict(exclude_unset=True)
@@ -66,6 +71,7 @@ async def add_new_product(product: product_pydantic_in, user: user_pydantic = De
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data. Original price must be > 0")
 
 
+# Delete a single product endpoint
 @router.delete("/{product_id}", response_model=DeleteProductResponse, status_code=status.HTTP_200_OK)
 async def delete_product(product_id: int, user: user_pydantic = Depends(get_current_user)):
     try:

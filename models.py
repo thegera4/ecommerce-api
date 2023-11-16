@@ -72,3 +72,35 @@ class AddProductResponse(BaseModel):
 class DeleteProductResponse(BaseModel):
     status: str
     message: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class RegistrationResponse(BaseModel):
+    status: str
+    message: str
+
+
+class AllUsersResponse(BaseModel):
+    status: str
+    users: List[user_pydantic_out]
+
+
+class SingleUserResponse(BaseModel):
+    status: str
+    data: dict
+
+
+class UploadProfilePicResponse(BaseModel):
+    status: str
+    message: str
+    url: str
+
+
+class UploadProductPicResponse(BaseModel):
+    status: str
+    message: str
+    url: str

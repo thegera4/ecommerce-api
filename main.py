@@ -69,7 +69,7 @@ def index():
 
 
 # Token generation endpoint
-@app.post("/token", response_model=dict, status_code=status.HTTP_200_OK)
+@app.post("/token", response_model=TokenResponse, status_code=status.HTTP_200_OK)
 async def generate_token(request_form: OAuth2PasswordRequestForm = Depends()):
     try:
         token = await token_generator(request_form.username, request_form.password)
@@ -79,7 +79,7 @@ async def generate_token(request_form: OAuth2PasswordRequestForm = Depends()):
 
 
 # User registration endpoint
-@app.post("/registration", response_model=dict, status_code=status.HTTP_201_CREATED)
+@app.post("/registration", response_model=RegistrationResponse, status_code=status.HTTP_201_CREATED)
 async def user_registration(user: user_pydantic_in):
     user_info = user.dict(exclude_unset=True)
     try:

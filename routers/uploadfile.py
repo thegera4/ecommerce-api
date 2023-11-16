@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File
-from models import user_pydantic, Business, Product
+from models import *
 from dotenv import dotenv_values
 from PIL import Image
 import secrets
@@ -16,7 +16,7 @@ credentials = dotenv_values(".env")
 # Endpoints:
 
 # Upload user profile picture endpoint
-@router.post("/profile", response_model=dict, status_code=status.HTTP_200_OK)
+@router.post("/profile", response_model=UploadProfilePicResponse, status_code=status.HTTP_200_OK)
 async def upload_profile_picture(file: UploadFile = File(...), user: user_pydantic = Depends(get_current_user)):
     filepath = "./static/images/"
     filename = file.filename
@@ -59,7 +59,7 @@ async def upload_profile_picture(file: UploadFile = File(...), user: user_pydant
 
 
 # Upload product picture endpoint
-@router.post("/product/{product_id}", response_model=dict, status_code=status.HTTP_200_OK)
+@router.post("/product/{product_id}", response_model=UploadProductPicResponse, status_code=status.HTTP_200_OK)
 async def upload_product_picture(file: UploadFile = File(...), product_id: int = None,
                                  user: user_pydantic = Depends(get_current_user)):
     filepath = "./static/images/"
