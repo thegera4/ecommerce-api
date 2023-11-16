@@ -25,7 +25,7 @@ from emails import *
 from models import *
 
 # routers
-from routers import users, uploadfile, products
+from routers import users, uploadfile, products, businesses
 
 # Instance of fastapi
 app = FastAPI()
@@ -34,6 +34,7 @@ app = FastAPI()
 app.include_router(users.router)
 app.include_router(products.router)
 app.include_router(uploadfile.router)
+app.include_router(businesses.router)
 
 # Static files setup config
 app.mount("/static", StaticFiles(directory="static"), name="static")

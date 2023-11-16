@@ -53,6 +53,8 @@ product_pydantic_in = pydantic_model_creator(Product, name="ProductIn", exclude_
 
 
 # Response models
+
+# Products
 class AllProductsResponse(BaseModel):
     status: str
     products: List[product_pydantic]
@@ -74,6 +76,12 @@ class DeleteProductResponse(BaseModel):
     message: str
 
 
+class UpdateProductResponse(BaseModel):
+    status: str
+    data: product_pydantic
+
+
+# Users
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
@@ -94,6 +102,7 @@ class SingleUserResponse(BaseModel):
     data: dict
 
 
+# Upload files
 class UploadProfilePicResponse(BaseModel):
     status: str
     message: str
@@ -104,3 +113,9 @@ class UploadProductPicResponse(BaseModel):
     status: str
     message: str
     url: str
+
+
+# Businesses
+class UpdateBusinessResponse(BaseModel):
+    status: str
+    data: business_pydantic
