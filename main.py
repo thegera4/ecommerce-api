@@ -39,9 +39,6 @@ app.include_router(businesses.router)
 # Static files setup config
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Instance to access the environment variables
-credentials = dotenv_values(".env")
-
 # Instance for handling OAuth 2.0 bearer tokens
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

@@ -1,16 +1,23 @@
 from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File
 from models import *
-from dotenv import dotenv_values
+# from dotenv import dotenv_values
 from PIL import Image
-import secrets
-
 from routers.users import get_current_user
+import secrets
+import os
+
+credentials = {
+    "EMAIL": os.getenv("EMAIL"),
+    "PASSWORD": os.getenv("PASSWORD"),
+    "SECRET": os.getenv("SECRET"),
+    "SERVER_URL": os.getenv("SERVER_URL"),
+}
 
 router = APIRouter(prefix="/uploadfile", tags=["Upload files"],
                    responses={status.HTTP_400_BAD_REQUEST: {"description": "Invalid file format"}})
 
 # instance to access the environment variables
-credentials = dotenv_values(".env")
+# credentials = dotenv_values(".env")
 
 
 # Endpoints:

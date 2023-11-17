@@ -2,14 +2,23 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from models import *
 from fastapi.security import OAuth2PasswordBearer
 import jwt
-from dotenv import dotenv_values
+# from dotenv import dotenv_values
+
+import os
+
+credentials = {
+    "EMAIL": os.getenv("EMAIL"),
+    "PASSWORD": os.getenv("PASSWORD"),
+    "SECRET": os.getenv("SECRET"),
+    "SERVER_URL": os.getenv("SERVER_URL"),
+}
 
 router = APIRouter(prefix="/users", tags=["Users"], responses={status.HTTP_404_NOT_FOUND: {"description": "User(s) "
                                                                                                           "not "
                                                                                                           "found"}})
 
 # instance to access the environment variables
-credentials = dotenv_values(".env")
+# credentials = dotenv_values(".env")
 
 # create an instance for handling OAuth 2.0 bearer tokens
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")

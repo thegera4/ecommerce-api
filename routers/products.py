@@ -62,8 +62,8 @@ async def add_new_product(product: product_pydantic_in, user: user_pydantic = De
             # convert product object form database to pydantic model
             product_data = await product_pydantic.from_tortoise_orm(product_obj)
             # remove the image and date_published fields from the response
-            product_data.pop("image")
-            product_data.pop("date_published")
+            # product_data.pop("image")
+            # product_data.pop("date_published")
             return {"status": "ok", "message": "Product created successfully", "product": product_data}
         except ValueError:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid data. Product not created in DB.")
