@@ -1,5 +1,5 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-# from dotenv import dotenv_values
+from dotenv import dotenv_values
 from typing import List
 from models import User
 import jwt
@@ -12,7 +12,7 @@ credentials = {
     "SERVER_URL": os.getenv("SERVER_URL"),
 }
 
-# credentials = dotenv_values(".env")
+credentials = dotenv_values(".env")
 
 config = ConnectionConfig(
     MAIL_USERNAME=credentials["EMAIL"],
