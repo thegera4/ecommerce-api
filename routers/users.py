@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from models import *
 from fastapi.security import OAuth2PasswordBearer
 import jwt
-# from dotenv import dotenv_values
+from dotenv import dotenv_values
 
 import os
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/users", tags=["Users"], responses={status.HTTP_404_N
                                                                                                           "found"}})
 
 # instance to access the environment variables
-# credentials = dotenv_values(".env")
+credentials = dotenv_values(".env")
 
 # create an instance for handling OAuth 2.0 bearer tokens
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -44,8 +44,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @router.get("/", response_model=AllUsersResponse, status_code=status.HTTP_200_OK)
 async def get_all_users():
     try:
-        users = await user_pydantic.from_queryset(User.all())
-        if len(users) == 0:
+        users_query = User.all()
+        print(users_query)
+        users = await user_pydantic.from_queryset(users_query)
+        if users is None or len(users) == 0:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found")
         return {"status": "ok", "users": users}
     except IndexError:
