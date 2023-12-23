@@ -1,6 +1,6 @@
 # Run this command to start the server: uvicorn main:app --reload
 # Run this command to freeze the requirements: pip freeze > requirements.txt
-from typing import Optional, Type
+# from typing import Optional, Type
 from fastapi import FastAPI, Request, Depends
 
 # response classes
@@ -9,11 +9,11 @@ from fastapi.responses import HTMLResponse
 # templates
 from fastapi.templating import Jinja2Templates
 from starlette.responses import RedirectResponse
-from tortoise import BaseDBAsyncClient
+from tortoise import Tortoise  # BaseDBAsyncClient
 from tortoise.contrib.fastapi import register_tortoise
 
 # signals (used to perform some actions when a certain event occurs)
-from tortoise.signals import post_save
+# from tortoise.signals import post_save
 
 # Authentication
 from authentication import *
@@ -21,20 +21,27 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 
 # Auxiliary functions
-from emails import *
+# from emails import *
 from models import *
 
 # routers
-from routers import users, uploadfile, products, businesses
+# from routers import users, uploadfile, products, businesses
+
+# environment variables
+from dotenv import dotenv_values
+
+# for db health check
+# from tortoise.backends.mysql.schema_generator import MySQLSchemaGenerator
+# from tortoise.backends.mysql import schema_generator
 
 # Instance of fastapi
 app = FastAPI()
 
 # Routers
-app.include_router(users.router)
-app.include_router(products.router)
-app.include_router(uploadfile.router)
-app.include_router(businesses.router)
+# app.include_router(users.router)
+# app.include_router(products.router)
+# app.include_router(uploadfile.router)
+# app.include_router(businesses.router)
 
 # Static files setup config
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -42,23 +49,24 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Instance for handling OAuth 2.0 bearer tokens
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
 # post_save is a signal that is emitted after an object is saved
-@post_save(User)
-async def create_business(
-        sender: "Type[User]",
-        instance: User,
-        created: bool,
-        using_db: "Optional[BaseDBAsyncClient]",
-        update_fields: List[str]
-) -> None:
-    if created:
-        business_obj = await Business.create(name=instance.username, owner=instance)
-        await business_pydantic.from_tortoise_orm(business_obj)
-        await send_email([instance.email], instance)
+# @post_save(User)
+# async def create_business(
+# sender: "Type[User]",
+# instance: User,
+# created: bool,
+# using_db: "Optional[BaseDBAsyncClient]",
+# update_fields: List[str]
+# ) -> None:
+# if created:
+# business_obj = await Business.create(name=instance.username, owner=instance)
+# await business_pydantic.from_tortoise_orm(business_obj)
+# await send_email([instance.email], instance)
 
 
 templates = Jinja2Templates(directory="templates")
+
+credentials = dotenv_values(".env")
 
 
 @app.get("/")
@@ -109,9 +117,33 @@ async def email_verification(request: Request, token: str):
     )
 
 
+# aux function to check db existence
+async def check_db_exists():
+    connection = Tortoise.get_connection("default")
+    db_exists_query = (
+        f"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s"
+    )
+    db_name = "ecommerce"
+    db_exists = await connection.execute_query(db_exists_query, [db_name])
+    return bool(db_exists)
+
+
+# Check the database connection endpoint
+@app.get("/health",response_model=HealthCheckResponse, status_code=status.HTTP_200_OK)
+async def health_check():
+    try:
+        db_exists = await check_db_exists()
+        if db_exists:
+            return {"status": "ok", "message": "Database connection is ok"}
+        return {"status": "error", "message": "Database connection error"}
+    except ConnectionError as e:
+        return {"status": "error", "message": "Database connection error"}
+
+
 register_tortoise(
-    app,
-    db_url="sqlite://db.sqlite3",
+    app,  # db for compose instead of localhost
+    db_url=f"mysql://{credentials['MYSQL_USER']}:{credentials['MYSQL_ROOT_PASSWORD']}@"
+           f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",
     modules={"models": ["models"]},
     generate_schemas=True,
     add_exception_handlers=True

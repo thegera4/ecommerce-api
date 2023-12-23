@@ -15,27 +15,34 @@ class User(Model):
     join_date = fields.DatetimeField(default=datetime.utcnow)
 
 
-class Business(Model):
-    id = fields.IntField(pk=True, index=True)
-    name = fields.CharField(max_length=100, null=False, unique=True)
-    city = fields.CharField(max_length=100, null=False, default="Unspecified")
-    region = fields.CharField(max_length=100, null=False, default="Unspecified")
-    description = fields.TextField(null=True)
-    logo = fields.CharField(max_length=200, null=False, default="defaultBusiness.png")
-    owner = fields.ForeignKeyField('models.User', related_name='business')
+# not used for one seller
+# class Business(Model):
+    # id = fields.IntField(pk=True, index=True)
+    # name = fields.CharField(max_length=100, null=False, unique=True)
+    # city = fields.CharField(max_length=100, null=False, default="Unspecified")
+    # region = fields.CharField(max_length=100, null=False, default="Unspecified")
+    # description = fields.TextField(null=True)
+    # logo = fields.CharField(max_length=200, null=False, default="defaultBusiness.png")
+    # owner = fields.ForeignKeyField('models.User', related_name='business')
 
 
 class Product(Model):
     id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=100, null=False, index=True)
-    category = fields.CharField(max_length=30, index=True)
-    original_price = fields.DecimalField(max_digits=12, decimal_places=2)
-    new_price = fields.DecimalField(max_digits=12, decimal_places=2)
-    percentage_discount = fields.IntField()
-    offer_expiration_data = fields.DateField(default=datetime.utcnow)
     image = fields.CharField(max_length=200, null=False, default="defaultProduct.png")
-    date_published = fields.DatetimeField(default=datetime.utcnow)
-    business = fields.ForeignKeyField('models.Business', related_name='products')
+    original_price = fields.DecimalField(max_digits=12, decimal_places=2)
+    category = fields.ForeignKeyField('models.Category', related_name='products')
+    # new_price = fields.DecimalField(max_digits=12, decimal_places=2)
+    # percentage_discount = fields.IntField()
+    # offer_expiration_data = fields.DateField(default=datetime.utcnow)
+
+    # date_published = fields.DatetimeField(default=datetime.utcnow)
+    # business = fields.ForeignKeyField('models.Business', related_name='products')
+
+
+class Category(Model):
+    id = fields.IntField(pk=True, index=True)
+    name = fields.CharField(max_length=30, null=False, unique=True)
 
 
 # Pydantic models
@@ -44,12 +51,15 @@ user_pydantic_in = pydantic_model_creator(User, name="UserIn", exclude_readonly=
                                                                                                "join_date"))
 user_pydantic_out = pydantic_model_creator(User, name="UserOut", exclude=("password",))
 
-business_pydantic = pydantic_model_creator(Business, name="Business")
-business_pydantic_in = pydantic_model_creator(Business, name="BusinessIn", exclude=("id", "logo",))
+# business_pydantic = pydantic_model_creator(Business, name="Business")
+# business_pydantic_in = pydantic_model_creator(Business, name="BusinessIn", exclude=("id", "logo",))
 
 product_pydantic = pydantic_model_creator(Product, name="Product")
 product_pydantic_in = pydantic_model_creator(Product, name="ProductIn", exclude_readonly=True,
                                              exclude=("id", "image", "percentage_discount", "date_published"))
+
+category_pydantic = pydantic_model_creator(Category, name="Category")
+category_pydantic_in = pydantic_model_creator(Category, name="CategoryIn", exclude_readonly=True, exclude=("id",))
 
 
 # Response models
@@ -116,6 +126,12 @@ class UploadProductPicResponse(BaseModel):
 
 
 # Businesses
-class UpdateBusinessResponse(BaseModel):
+# class UpdateBusinessResponse(BaseModel):
+    # status: str
+    # data: business_pydantic
+
+
+# Health check
+class HealthCheckResponse(BaseModel):
     status: str
-    data: business_pydantic
+    message: str

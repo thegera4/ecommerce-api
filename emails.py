@@ -5,14 +5,14 @@ from models import User
 import jwt
 import os
 
-# credentials = {
-    # "EMAIL": os.getenv("EMAIL"),
-    # "PASSWORD": os.getenv("PASSWORD"),
-    # "SECRET": os.getenv("SECRET"),
-    # "SERVER_URL": os.getenv("SERVER_URL"),
-# }
-
 credentials = dotenv_values(".env")
+
+#credentials = {
+    #"EMAIL": os.getenv("EMAIL"),
+    #"PASSWORD": os.getenv("PASSWORD"),
+    #"SECRET": os.getenv("SECRET"),
+    #"SERVER_URL": os.getenv("SERVER_URL"),
+#}
 
 config = ConnectionConfig(
     MAIL_USERNAME=credentials["EMAIL"],

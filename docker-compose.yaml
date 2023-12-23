@@ -1,8 +1,22 @@
-version: '3'
+version: '3.7'
 services:
-  ecommerce-fastapi:
-    build: .
+  db:
+    image: mysql:latest
     env_file:
       - .env
     ports:
-      - "8000:8000"
+        - "3306:3306"
+    volumes:
+        - fastapi_ecommerce:/data/db
+  # ecommerce-fastapi:
+    # build: .
+    # env_file:
+      # - .env
+    # ports:
+      # - "8000:8000"
+    # depends_on:
+        # db:
+          # condition: service_healthy
+
+volumes:
+  fastapi_ecommerce:
