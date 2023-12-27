@@ -72,7 +72,7 @@ class AllProductsResponse(BaseModel):
 
 class SingleProductResponse(BaseModel):
     status: str
-    data: dict
+    data: product_pydantic
 
 
 class AddProductResponse(BaseModel):
