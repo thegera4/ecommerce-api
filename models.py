@@ -43,6 +43,7 @@ class Product(Model):
 class Category(Model):
     id = fields.IntField(pk=True, index=True)
     name = fields.CharField(max_length=30, null=False, unique=True)
+    products: fields.ReverseRelation[Product]
 
 
 # Pydantic models
@@ -55,11 +56,10 @@ user_pydantic_out = pydantic_model_creator(User, name="UserOut", exclude=("passw
 # business_pydantic_in = pydantic_model_creator(Business, name="BusinessIn", exclude=("id", "logo",))
 
 product_pydantic = pydantic_model_creator(Product, name="Product")
-product_pydantic_in = pydantic_model_creator(Product, name="ProductIn", exclude_readonly=True,
-                                             exclude=("id", "image", "percentage_discount", "date_published"))
+product_pydantic_in = pydantic_model_creator(Product, name="ProductIn", exclude_readonly=True)
 
 category_pydantic = pydantic_model_creator(Category, name="Category")
-category_pydantic_in = pydantic_model_creator(Category, name="CategoryIn", exclude_readonly=True, exclude=("id",))
+category_pydantic_in = pydantic_model_creator(Category, name="CategoryIn", exclude_readonly=True)
 
 
 # Response models
@@ -135,3 +135,15 @@ class UploadProductPicResponse(BaseModel):
 class HealthCheckResponse(BaseModel):
     status: str
     message: str
+
+
+# Categories
+class AddCategoryResponse(BaseModel):
+    status: str
+    message: str
+    category: category_pydantic
+
+
+class AllCategoriesResponse(BaseModel):
+    status: str
+    categories: List[category_pydantic]

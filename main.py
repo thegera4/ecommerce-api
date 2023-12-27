@@ -25,7 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from models import *
 
 # routers
-# from routers import users, uploadfile, products, businesses
+from routers import products, categories  # users, uploadfile, businesses
 
 # environment variables
 from dotenv import dotenv_values
@@ -39,7 +39,8 @@ app = FastAPI()
 
 # Routers
 # app.include_router(users.router)
-# app.include_router(products.router)
+app.include_router(products.router)
+app.include_router(categories.router)
 # app.include_router(uploadfile.router)
 # app.include_router(businesses.router)
 

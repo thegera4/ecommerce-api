@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from models import *
 from routers.users import get_current_user
 
-
 router = APIRouter(prefix="/products", tags=["Products"],
                    responses={status.HTTP_404_NOT_FOUND: {"description": "Product(s) not found"}})
 
@@ -18,6 +17,34 @@ async def get_all_products():
     except IndexError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No products found")
 
+
+# Add a single new product endpoint
+@router.post("/", response_model=AddProductResponse, status_code=status.HTTP_200_OK)
+async def add_new_product(product: product_pydantic_in, category_id: int):  # , user: user_pydantic = Depends(
+    # get_current_user)
+    product_info = product.dict(exclude_unset=True)
+    # add a category to the product, from the categories in the database
+    product_info["category"] = await Category.get(id=category_id)
+    # avoid division by zero
+    # if product_info["original_price"] > 0:
+    # product_info["percentage_discount"] = round(
+    # (product_info["original_price"] - product_info["new_price"]) / product_info["original_price"] * 100)
+    try:
+        # create product in database
+        product_obj = await Product.create(**product_info)  # , business=user
+        # convert product object form database to pydantic model
+        product_data = await product_pydantic.from_tortoise_orm(product_obj)
+        # remove the image and date_published fields from the response
+        # product_data.pop("image")
+        # product_data.pop("date_published")
+        return {"status": "ok", "message": "Product created successfully", "product": product_data}
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid data. Product not created in DB.")
+    # else:
+    # raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data. Original price must be > 0")
+
+
+'''
 
 # Get a single product endpoint
 @router.get("/{product_id}", response_model=SingleProductResponse, status_code=status.HTTP_200_OK)
@@ -46,29 +73,6 @@ async def get_product(product_id: int):
         }
     except IndexError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
-
-
-# Add a single new product endpoint
-@router.post("/", response_model=AddProductResponse, status_code=status.HTTP_200_OK)
-async def add_new_product(product: product_pydantic_in, user: user_pydantic = Depends(get_current_user)):
-    product_info = product.dict(exclude_unset=True)
-    # avoid division by zero
-    if product_info["original_price"] > 0:
-        product_info["percentage_discount"] = round(
-            (product_info["original_price"] - product_info["new_price"]) / product_info["original_price"] * 100)
-        try:
-            # create product in database
-            product_obj = await Product.create(**product_info, business=user)
-            # convert product object form database to pydantic model
-            product_data = await product_pydantic.from_tortoise_orm(product_obj)
-            # remove the image and date_published fields from the response
-            # product_data.pop("image")
-            # product_data.pop("date_published")
-            return {"status": "ok", "message": "Product created successfully", "product": product_data}
-        except ValueError:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid data. Product not created in DB.")
-    else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data. Original price must be > 0")
 
 
 # Delete a single product endpoint
@@ -121,3 +125,5 @@ async def update_product(product_id: int, update_info: product_pydantic_in,
             )
     except IndexError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+
+'''
