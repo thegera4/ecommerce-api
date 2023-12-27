@@ -6,5 +6,4 @@
 
 # ENVs
 .env
-.env*
-.vercel
+
