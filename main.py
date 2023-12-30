@@ -146,7 +146,7 @@ register_tortoise(
     app,  # db for compose instead of localhost
     # db_url=f"mysql://{credentials['MYSQL_USER']}:{credentials['MYSQL_ROOT_PASSWORD']}@"
     # f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",  # credentials["MYSQL_RAILWAY"],
-    db_url=credentials["POSTGRES_URL"],
+    db_url=os.getenv("POSTGRES_URL"),
     modules={"models": ["models"]},
     generate_schemas=True,
     add_exception_handlers=True
