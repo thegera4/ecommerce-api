@@ -29,6 +29,7 @@ from routers import products, categories  # users, uploadfile, businesses
 
 # environment variables
 from dotenv import dotenv_values
+import os
 
 # for db health check
 # from tortoise.backends.mysql.schema_generator import MySQLSchemaGenerator
@@ -145,7 +146,7 @@ register_tortoise(
     app,  # db for compose instead of localhost
     # db_url=f"mysql://{credentials['MYSQL_USER']}:{credentials['MYSQL_ROOT_PASSWORD']}@"
     # f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",
-    db_url=credentials["MYSQL_RAILWAY"],
+    db_url=credentials.get("MYSQL_RAILWAY"),  # credentials["MYSQL_RAILWAY"],
     modules={"models": ["models"]},
     generate_schemas=True,
     add_exception_handlers=True
