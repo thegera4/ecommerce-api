@@ -123,7 +123,7 @@ async def email_verification(request: Request, token: str):
 async def check_db_exists():
     connection = Tortoise.get_connection("default")
     db_exists_query = (
-        f"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = %s"
+        f"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = $1 "  # %s for mysql
     )
     db_name = "ecommerce"
     db_exists = await connection.execute_query(db_exists_query, [db_name])
@@ -145,8 +145,8 @@ async def health_check():
 register_tortoise(
     app,  # db for compose instead of localhost
     # db_url=f"mysql://{credentials['MYSQL_USER']}:{credentials['MYSQL_ROOT_PASSWORD']}@"
-    # f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",
-    db_url=credentials.get("MYSQL_RAILWAY"),  # credentials["MYSQL_RAILWAY"],
+    # f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",  # credentials["MYSQL_RAILWAY"],
+    db_url=credentials["POSTGRESQL_VERCEL"],
     modules={"models": ["models"]},
     generate_schemas=True,
     add_exception_handlers=True
