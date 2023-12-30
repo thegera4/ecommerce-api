@@ -130,7 +130,7 @@ async def check_db_exists():
 
 
 # Check the database connection endpoint
-@app.get("/health",response_model=HealthCheckResponse, status_code=status.HTTP_200_OK)
+@app.get("/health", response_model=HealthCheckResponse, status_code=status.HTTP_200_OK)
 async def health_check():
     try:
         db_exists = await check_db_exists()
@@ -143,8 +143,9 @@ async def health_check():
 
 register_tortoise(
     app,  # db for compose instead of localhost
-    db_url=f"mysql://{credentials['MYSQL_USER']}:{credentials['MYSQL_ROOT_PASSWORD']}@"
-           f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",
+    # db_url=f"mysql://{credentials['MYSQL_USER']}:{credentials['MYSQL_ROOT_PASSWORD']}@"
+    # f"{credentials['SERVER_URL']}/{credentials['MYSQL_DATABASE']}",
+    db_url=credentials["MYSQL_RAILWAY"],
     modules={"models": ["models"]},
     generate_schemas=True,
     add_exception_handlers=True
